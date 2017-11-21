@@ -1,0 +1,327 @@
+<template>
+    <div id="root">
+        <div id="img-list">
+        <div class="geren">
+            <label for="file-selector" id="file-label"><img  :src="files" class="images"></label><br><br>
+            名字：<input type="text" v-model="user.name"><br><br>
+            <section>
+             <span>签名：</span><textarea v-model="user.motto" name="" id="" cols="35" rows="3"></textarea>
+           </section>
+        </div>
+
+            <input id="file-selector" type="file" accept="image/jpeg,image/png,image/gif" @change="chooseImage" multiple>
+        </div>
+        <div id="btn">
+            <button @click="btnClick">提交</button>
+        </div>   
+  </div>
+</template>
+
+<script>
+export default {
+  data:function(){
+    return {
+        files:'',
+        photo:'',
+        user:[],
+    };
+  },
+ methods:{
+    chooseImage:function(e){
+          let that = this
+            var f = e.target.files[0];
+          if(f){
+            var url = URL.createObjectURL(f);
+            console.log()
+            that.photo = f;
+            that.files = url;
+            }
+
+    },
+    btnClick:function(){
+        var data = new FormData();
+            data.append("img",this.photo);
+            data.append("name",this.user.name)
+            data.append("motto",this.user.motto)
+            data.append("_id",this.user._id)
+       this.$http.post(`/server/users/update`,data,{
+            headers: {
+                 "Content-Type": "multipart/form-data"
+            }
+        }).then();
+ 
+    },
+  },
+  mounted:function(){
+    this.$http({
+          method:'GET',
+          url:'/server/users/session',
+          data:''
+      }).then((data)=>{
+      if(data.data.error == 0){
+        this.user = data.data.data
+        this.files = this.user.img
+      }else{
+        this.$router.push({path:'/login'})
+      }
+    }).catch((err)=>{
+        console.log(err)
+    })
+  }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+.geren{
+  background:#fff;
+  padding-top:15px;
+  text-align:center;
+  width:100%;
+}
+.geren input{
+  padding:5px 3px
+}
+.geren textarea{
+  padding:5px 3px
+}
+.geren section{
+  overflow:hidden;
+  width:90%;
+  margin:0 auto;
+}
+.geren span{
+  float:left;
+}
+  #root{
+    height:calc(100vh - 120px);
+    overflow-y: scroll;
+    background-color: white;
+  }
+  #white{
+    margin:8px;
+    padding:8px 15px;
+    background-color:#F5F5F5;
+}
+#white span{
+    font-size:14px;
+    text-align:center;
+    color:#29B0FA;
+}
+#white input{
+    margin-left:6px;
+    height:36px;
+    width:240px;
+    border:none;
+    font-size:11px;
+}
+#white input:nth-of-type(1){
+    border-bottom:solid 1px #dddddd;
+}
+#top,.bottom{
+    height:36px;
+    line-height:36px;
+}
+ #file-selector{
+    display: none;
+}
+#file-label{
+    height: 29vw;
+    display: block;
+    font-size: 80px;
+    text-align: center;
+    line-height: 100px;
+    vertical-align: top;
+    border-radius:50%;
+}
+
+.images{
+    width: 29vw;
+    height: 29vw;
+    margin-right: 6px;
+    border-radius:50%;
+}
+#root>label{
+    font-size:14px;
+    color:#29B0FA;
+    
+}
+#btn{
+    width:100%;
+    text-align:center;
+    margin:40px 0;
+}
+#btn button{
+    color:white;
+    background-color:#FF3C3C;
+    border:none;
+    width:290px;
+    height:45px;
+    border-radius:5px;
+}
+
+</style>
+
+
+
+<template>
+   <div>
+        <label>商品配图</label>
+        <br>
+        <br>
+        <div id="img-list">
+            <img v-for="i in files" :src="i" class="images" :key="i">
+            <label for="file-selector" id="file-label">+</label>
+            <input id="file-selector" type="file" accept="image/jpeg,image/png,image/gif" @change="chooseImage" multiple>
+        </div>
+        <div id="btn">
+            <button @click="btnClick">提交</button>
+        </div>
+            
+
+  </div>
+</template>
+
+<script>
+export default {
+  data:function(){
+    return {
+        files:[],
+        cate:"",
+        name:"",
+        price:0,
+        photo:''
+    };
+  },
+ methods:{
+    chooseImage:function(e){
+        // console.log(this.$refs);
+        for(var i = 0;i<e.target.files.length;i++){
+            // var f = e.target.files[i];
+            // this.files.push(f);
+            // var img =document.createElement("img");
+            // img.classList.add("images");
+            // var url = URL.createObjectURL(f);
+            // img.src = url;
+            // this.$refs.list.insertBefore(img,this.$refs.item);
+
+            var f = e.target.files[i];
+            this.photo = f;
+            var url = URL.createObjectURL(f);
+            this.files.push(url);
+        }
+        // console.log(this.files);
+
+    },
+    btnClick:function(){
+      console.log(1)
+        var data = new FormData();
+
+
+          console.log(this.photo)
+            data.append("pic",this.photo);
+       
+       
+        // console.log(data);
+        // var paramArr = {
+        //     cate:this.cate,
+        //     name:this.name,
+        //     price:this.price
+        // };
+        data.append("cate",this.cate);
+        data.append("name",this.name);
+        data.append("price",this.price);
+        this.$http.post("/server/users/update",data,{
+            headers: {
+                 "Content-Type": "multipart/form-data"
+            }
+
+        })
+        .then(res=>{
+            layer.msg(res.data.msg,{time:3000});
+            if(!res.data.err){
+                // this.name = "";
+                // this.cate = "";
+                // this.price = 0;
+                // this.files = [];
+                location.reload();
+            }
+        });
+
+    },
+  }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+  #root{
+    height:calc(100vh - 120px);
+    overflow-y: scroll;
+    background-color: white;
+    box-sizing: border-box
+  }
+  #white{
+    margin:8px;
+    padding:8px 15px;
+    background-color:#F5F5F5;
+}
+#white span{
+    font-size:14px;
+    text-align:center;
+    color:#29B0FA;
+}
+#white input{
+    margin-left:6px;
+    height:36px;
+    width:240px;
+    border:none;
+    font-size:11px;
+}
+#white input:nth-of-type(1){
+    border-bottom:solid 1px #dddddd;
+}
+#top,.bottom{
+    height:36px;
+    line-height:36px;
+}
+ #file-selector{
+    display: none;
+}
+#file-label{
+    width: 29vw;
+    height: 29vw;
+    border: solid 1px black;
+    display: inline-block;
+    font-size: 80px;
+    text-align: center;
+    line-height: 100px;
+    vertical-align: top;
+}
+
+.images{
+    width: 29vw;
+    height: 29vw;
+    border: solid 1px black;
+    margin-right: 6px;
+}
+#root>label{
+    font-size:14px;
+    color:#29B0FA;
+    
+}
+#btn{
+    width:100%;
+    text-align:center;
+    margin:40px 0;
+}
+#btn button{
+    color:white;
+    background-color:#FF3C3C;
+    border:none;
+    width:290px;
+    height:45px;
+    border-radius:5px;
+}
+
+</style>
